@@ -93,7 +93,7 @@
 		const $caption = $("#caption");
 		const $nextBtn = $("#next-btn");
 		const $spinner = $(".loader");
-		let namebase = MALES;
+		let namebase = FACES;
 		
 		let $currentImg;
 
@@ -103,7 +103,7 @@
 
 
 		function faceURL(){
-			const FACE_URL = "img/m/" + _.sample(MALES);
+			const FACE_URL = "img/faces/" + _.sample(FACES);
 			
 			return FACE_URL;
 		}
@@ -149,8 +149,8 @@
 			$(".face-img").hide().eq(n).show();
 		}
 		
-		function getRandomMaleNameSample(n) {
-			return _.chain(MALES).sample(n).map(function(e){
+		function getRandomNameSample(n) {
+			return _.chain(FACES).sample(n).map(function(e){
 				return titleCase(e.split('.')[0]);
 			}).value()
 		}
@@ -183,7 +183,7 @@
 		function renderQuestion(faceNum) {
 			gotoFace(faceNum);
 			const NUMBER_CHOICES = 4;
-			let choices = getRandomMaleNameSample(NUMBER_CHOICES);
+			let choices = getRandomNameSample(NUMBER_CHOICES);
 			let correctChoiceNo = _.random(0, NUMBER_CHOICES - 3);
 			let correctName = names[faceNum];
 			choices[correctChoiceNo] = correctName;
