@@ -6,7 +6,8 @@
     <title></title>
     <meta name="author" content="">
     <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"> 
 	<link rel='stylesheet' href='loaders.css' type="text/css" />
     <style>
         #face-div {
@@ -62,11 +63,12 @@
 	</div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+	<script src="js/nameIndex.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js" integrity="sha256-G7A4JrJjJlFqP0yamznwPjAApIKPkadeHfyIwiaa9e0=" crossorigin="anonymous"></script>
     
-	<div id="results-modal" class="modal">
+	<div id="results-modal" class="modal"></div>
 
-	</div>
+	<div id="flasher" class="modal" hidden></div>
 	
 	<script>
 		$(function(){
@@ -84,14 +86,14 @@
 		
 		});
 		
-		const NUM_ROUNDS = 2;
+		const NUM_ROUNDS = 7;
 		let numRounds = 0;
 		let numQuestion = 0;
 		let numCorrect = 0;
 		const $caption = $("#caption");
 		const $nextBtn = $("#next-btn");
 		const $spinner = $(".loader");
-		let namebase = ["Bob", "Jim", "Bill", "Mandy", "Sal", "Hal", "David", "Paul"];
+		let namebase = MALES;
 		
 		let $currentImg;
 
@@ -99,11 +101,11 @@
 		let names = [];
 
 
-		function faceURL(){
-			const FACE_URL = "https://thispersondoesnotexist.com/image";
 
-			//must add random querystring to evade cache
-			return FACE_URL + `?${_.random(0,9999)}`;
+		function faceURL(){
+			const FACE_URL = "img/m/" + _.sample(MALES);
+			
+			return FACE_URL;
 		}
 		
 		/* Load and show the next faces, adding it to faces and names */
@@ -121,7 +123,7 @@
 			$currentImg.one('load', function(e){
 				$currentImg.show();
 				$spinner.hide();
-				let nextName = _.sample(namebase);
+				let nextName = titleCase($currentImg[0].src.split("/").pop().split('.')[0])
 				names.push(nextName);
 				images.push($currentImg);
 				$caption.text("My name is " + nextName);
@@ -130,7 +132,7 @@
 				
 				setTimeout(function(){
 					$nextBtn.prop('disabled', false);
-				}, 500);
+				}, 0);
 
 			});
 		}
@@ -147,7 +149,11 @@
 			$(".face-img").hide().eq(n).show();
 		}
 		
-		
+		function getRandomMaleNameSample(n) {
+			return _.chain(MALES).sample(n).map(function(e){
+				return titleCase(e.split('.')[0]);
+			}).value()
+		}
 		
 		function renderResults() { 
 			
@@ -162,10 +168,22 @@
 			$("#results-modal").show();
 		} 
 		
+		function flash(msg) {
+			$("#flasher").html(`<h2>${msg}</h2>`).show();
+			setTimeout(function(){
+				$("#flasher").html('').show();
+			}, 700);
+		}
+		
+		function titleCase(str) {
+		  return str.toLowerCase().split(' ').map(function(word) {
+			return (word.charAt(0).toUpperCase() + word.slice(1));
+		  }).join(' ');
+		}
 		function renderQuestion(faceNum) {
 			gotoFace(faceNum);
 			const NUMBER_CHOICES = 4;
-			let choices = _.sample(namebase, NUMBER_CHOICES);
+			let choices = getRandomMaleNameSample(NUMBER_CHOICES);
 			let correctChoiceNo = _.random(0, NUMBER_CHOICES - 3);
 			let correctName = names[faceNum];
 			choices[correctChoiceNo] = correctName;
@@ -180,6 +198,9 @@
 			$(".answer-btn").one('click', function(e) {
 				if (this.textContent === correctName) {
 					numCorrect++;
+					flash("Correct!");
+				} else {
+					flash("Incorrect!");
 				}
 				
 				if (numQuestion == NUM_ROUNDS - 1){
